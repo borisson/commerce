@@ -54,8 +54,15 @@ class CurrencyImporter implements CurrencyImporterInterface {
    * {@inheritdoc}
    */
   public function getImportable() {
+    // Until https://www.drupal.org/node/2684873 lands, the language manager can
+    // return null for getConfigOverrideLanguage.
+    if ($this->languageManager->getConfigOverrideLanguage() !== null) {
+      $langcode = $this->languageManager->getConfigOverrideLanguage()->getId();
+    }
+    else {
+      $langcode = $this->languageManager->getCurrentLanguage()->getId();
+    }
     $imported_currencies = $this->storage->loadMultiple();
-    $langcode = $this->languageManager->getConfigOverrideLanguage()->getId();
     $all_currencies = $this->externalRepository->getAll($langcode, 'en');
     $importable_currencies = array_diff_key($all_currencies, $imported_currencies);
     $importable_currencies = array_map(function ($currency) {

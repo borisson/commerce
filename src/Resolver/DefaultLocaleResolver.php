@@ -42,7 +42,15 @@ class DefaultLocaleResolver implements LocaleResolverInterface {
    * {@inheritdoc}
    */
   public function resolve() {
-    $language = $this->languageManager->getConfigOverrideLanguage()->getId();
+    // Until https://www.drupal.org/node/2684873 lands, the language manager can
+    // return null for getConfigOverrideLanguage.
+    if ($this->languageManager->getConfigOverrideLanguage() !== null) {
+      $language = $this->languageManager->getConfigOverrideLanguage()->getId();
+    }
+    else {
+      $language = $this->languageManager->getCurrentLanguage()->getId();
+    }
+
     $language_parts = explode('-', $language);
     if (count($language_parts) > 1 && strlen(end($language_parts)) == 2) {
       // The current language already has a country component (e.g. 'pt-br'),
